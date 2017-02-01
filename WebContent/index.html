@@ -1,0 +1,113 @@
+<!doctype html>
+<html ng-app="ssnApp">
+<head>
+<title>Simple Social Network</title>
+<script src="js/angular.min.js"></script>
+<script type="text/javascript">
+	angular.module("ssnApp", []).controller("ssnController",
+			function($scope, $http) {
+				$scope.posts = [];
+				var refresh = function() {
+					$http.get('api/posts/').then(function(response) {
+						$scope.posts = response.data
+					}, function(response) {
+						console.log("error fetching posts")
+						console.log(response);
+					})
+				}
+				refresh();
+				$scope.newpost = {
+					author : '',
+					content : ''
+				};
+
+				$scope.addPost = function() {
+					$http.post('api/posts/', $scope.newpost, {headers: {'Content-Type': 'application/json'}}).then(
+						function(response) {
+							refresh();
+							$scope.newpost = {author: '', content: ''};
+						},
+						function(response) {
+							console.log("Could not add post " + response);
+						}
+					)
+				}
+				
+			})
+</script>
+<style type="text/css">
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	padding-left: 50px;
+	padding-right: 50px;
+	width: 100%;
+}
+
+header {
+	width: 100%;
+	padding: 10px;
+	padding-left: 20px;
+	margin-bottom: 20px; 
+	background : #222;
+	color: #fff;
+	background: #222;
+}
+
+h1 {
+	margin:0px;
+}
+section.main {
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	background: #eee;
+	color: #000;
+}
+
+.post {
+	width: 100%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	background: #fff;
+}
+
+.author {
+	font-weight: bold;
+}
+
+.content {
+	width: 100%;
+}
+</style>
+</head>
+<body ng-controller="ssnController">
+	<header>
+		<h1>Simple Social Network</h1>
+	</header>
+	<section class="main">
+		<div class="post" ng-repeat="post in posts">
+			<div class="author">{{post.author}}</div>
+			<div class="content">{{post.content}}</div>
+		</div>
+		<div class="post">
+			<div class="author">
+				<label>Author:</label><input type="text" ng-model="newpost.author" />
+			</div>
+			<div class="content">
+				<label>Content:</label><br />
+				<input type="text" ng-model="newpost.content" />
+			</div>
+			<button ng-click="addPost()">Submit</button>
+			;
+		</div>
+	</section>
+</body>
+</html>
